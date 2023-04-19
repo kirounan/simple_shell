@@ -25,6 +25,8 @@ list_t *add_node(list_t **head, const char *str);
 list_t *add_node_end(list_t **head, const char *str);
 void free_list(list_t **head);
 
+ssize_t _strchr(const char *str, char c);
+
 char **tokenize(const char *str);
 size_t count_tokens(const char *str);
 void free_tokens(char **tokens);
