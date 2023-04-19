@@ -72,23 +72,6 @@ void free_list(list_t **head)
 	free(*head);
 	*head = NULL;
 }
-
-/**
- * strchr - get the index of the first matching character
- */
-ssize_t _strchr(const char *str, char c)
-{
-	size_t pos;
-
-	if (!str)
-		return (-1);
-
-	pos = 0;
-	while (str[pos] && str[pos] != c)
-		++pos;
-
-	return (pos);
-}
 /**
  * str_to_list - turn a string into a linked list
  */
@@ -96,7 +79,7 @@ list_t *str_to_list(const char *str, char delimiter)
 {
 	list_t *head = NULL;
 	list_t *tail = NULL;
-	size_t len;
+	ssize_t len;
 
 	if (!str)
 		return (NULL);
@@ -104,6 +87,8 @@ list_t *str_to_list(const char *str, char delimiter)
 	while (*str)
 	{
 		len = _strchr(str, delimiter);
+		if (len == -1)
+			len = strlen(str);
 		tail = add_node_end(&head, NULL);
 		if (!tail)
 		{

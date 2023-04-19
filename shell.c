@@ -8,56 +8,45 @@
  *
  * Return: 0
  */
-int main(int argc __attribute__((unused)), char **argv __attribute__((unused)))
+int main(int argc, char **argv)
 {
-	char **tokens = NULL;
-	char *line = NULL;
-	size_t len = 0;
-	ssize_t n_read;
-	pid_t child;
-	int status = 0;
-
+	static info_t info = {
+		NULL,
+		0,
+		1,
+		NULL,
+		0,
+		NULL,
+		NULL,
+		EXIT_SUCCESS,
+		0,
+		NULL,
+		NULL,
+		NULL
+	};
+	/* ssize_t n_read; */
 	int interactive = isatty(STDIN_FILENO);
 
-	list_t *path = str_to_list(_getenv("PATH"), ':');
+	info.pid = getpid();
+	info.cwd = getcwd(NULL, 0);
+	info.path = str_to_list(_getenv("PATH"), ':');
+	info.env = envtolist(environ);
+	signal(2, _sigint);
+	info.argv = argv;
+	info.argc = argc;
 
-	while (1)
+	for(;;)
 	{
 		if (interactive)
 			write(STDERR_FILENO, "$ ", 2);
 
-		n_read = getline(&line, &len, stdin);
-		if (n_read < 1)
-		{
-			free(line);
-			free_list(&path);
-			write(STDOUT_FILENO, "\n", 1);
+		_read(&info);
 
-			if (n_read < 0)
-				exit(EXIT_FAILURE);
-
-			exit(WEXITSTATUS(status));
-		}
-
-		tokens = tokenize(line);
-		if (tokens)
-		{
-			child = fork();
-
-			if (child == 0)
-			{
-				free(line);
-				free_list(&path);
-				execve(tokens[0], tokens, NULL);
-				free_tokens(tokens);
-				exit(EXIT_FAILURE);
-			}
-
-			if (child > 0)
-				wait(&status);
-
-			free_tokens(tokens);
-		}
+		info.tokens = tokenize(info.line);
+		if (info.tokens)
+			_run(&info);
+		free_tokens(info.tokens);
+		info.cmd_num += 1;
 	}
 
 }
