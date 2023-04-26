@@ -1,2 +1,1 @@
-# simple_shell
-A simple UNIX command interpreter
+Implementing simple shell with C language
